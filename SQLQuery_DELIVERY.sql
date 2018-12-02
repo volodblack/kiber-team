@@ -25,3 +25,39 @@ CREATE TABLE Клієнти  (
  On update cascade 
  On Delete cascade) 
  Go
+ CREATE TABLE [Тип відділення](
+Id varchar(10) not null,
+[Назва] nvarchar(50) NOT NULL,
+[Опис] nvarchar(150) null,
+constraint [Тип відділення первинний ключ] Primary Key  (Id),
+constraint [перевірка типів] check  ([Назва] in ('Мале', 'Середнє', 'Велике'))
+)
+GO
+CREATE TABLE Відділення (
+[Id] varchar(10) NOT NULL,
+[Id типу] varchar(10) NOT NULL,
+[Область] nvarchar(50) NOT NULL,
+[Місто] nvarchar(50) NOT NULL,
+[Адреса] nvarchar(50) NOT NULL,
+[Номер тел] char(13) not null,
+constraint[відділення первинний ключ] Primary Key (Id),
+constraint "відділення - тип" Foreign key([Id типу])
+References [Тип відділення] (Id)
+On update cascade 
+On Delete cascade) 
+Go 
+CREATE TABLE [Працівники](
+[Id]  varchar(10) NOT NULL,
+[Прізвище] nvarchar(50) NOT NULL,
+[Імя] nvarchar(50) NOT NULL,
+[По-батькові] nvarchar(50) NOT NULL,
+[Номер тел] char(13) not null,
+Constraint [унікальний тел] Unique ([Номер тел]),
+Constraint[працівники первинний ключ] Primary Key (Id))
+GO
+CREATE TABLE [Упаковка](
+[Id]  varchar(10) NOT NULL,
+[Назва] nvarchar(50) NOT NULL,
+[Опис] nvarchar(150) null,
+constraint [упаковка первинний ключ] Primary Key  (Id))
+GO
