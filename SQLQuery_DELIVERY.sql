@@ -61,3 +61,30 @@ CREATE TABLE [Упаковка](
 [Опис] nvarchar(150) null,
 constraint [упаковка первинний ключ] Primary Key  (Id))
 GO
+CREATE TABLE Постачальники (
+Id varchar(10) NOT NULL ,
+Назва nvarchar(50) NOT NULL,
+Адреса nvarchar(50) NOT NULL,
+Email varchar(50) NOT NULL,
+[Номер тел] char(13) not null,
+CONSTRAINT [Постачальники первинний ключ] PRIMARY KEY (Id),
+CONSTRAINT [унікальний емейл пост] UNIQUE (Email),
+CONSTRAINT [унікальний тел пост] Unique ([Номер тел]))
+go   
+CREATE TABLE [Замовлення упаковки](
+Id  int identity (1,1),
+[Id постачальника] varchar(10) NOT NULL,
+[Id упаковки]  varchar(10) NOT NULL,
+Дата  datetime NOT NULL,
+Ціна float not null,
+Кількість int not null, 
+CONSTRAINT [Замовлення упаковки первинний ключ] PRIMARY KEY (Id),
+CONSTRAINT "Замовлення упаковки - постачальники" Foreign key([Id постачальника])
+references Постачальники (Id)
+On update cascade 
+On Delete cascade,
+CONSTRAINT "Замовлення упаковки - упаковка" Foreign key([Id упаковки])
+references [Упаковка] (Id)
+On update cascade 
+On Delete cascade)
+go
