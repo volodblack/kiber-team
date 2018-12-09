@@ -359,3 +359,75 @@ left join Замовлення as з on к.Id = з.[Id відпрівника]
 join  [Тип клієнта] т on т.Id = к.[Код типу]
 group by Прізвище, імя,[Назва типу ]  ,[Id відпрівника]
 go
+
+
+
+
+
+alter table Замовлення
+add [Вартість зі знижкою] FLOAT null
+go
+alter table [Тип клієнта]
+add [Верхня межа] int
+alter table [Тип клієнта] 
+add [Нижня межа] int
+alter table [Тип клієнта] 
+	alter column Знижка float 
+Update [Тип клієнта]
+	set [Верхня межа] = 5, [Нижня межа] = 0, Знижка =1
+	where id =0 
+Update [Тип клієнта]
+	set [Верхня межа] = 10, [Нижня межа] = 5, Знижка =0.95
+	where id =1
+Update [Тип клієнта]
+	set [Верхня межа] = 15, [Нижня межа] = 10, Знижка =0.93
+	where id =2
+Update [Тип клієнта]
+	set [Верхня межа] = 1000, [Нижня межа] = 15, Знижка =0.9
+	where id =3
+go
+create trigger Знижечка 
+on Замовлення 
+for insert 
+	as
+	declare @num7 int = 0 
+	declare @count int
+	declare @disc float
+	while @num7<=(Select count(id) from Замовлення) 
+		begin
+		set @count = (Select Count(id)
+								from Замовлення  
+								where id<=@num7 and [Id відпрівника]=(select [Id відпрівника] from Замовлення where id = @num7))
+		set @disc= (Select Знижка from [Тип клієнта] where @count < [Верхня межа] and @count>=[Нижня межа])
+		update Замовлення
+			set [Вартість зі знижкою]=@disc*[Вартість доставки]
+			where id = @num7  
+		set @num7 = @num7+1
+		end
+go
+
+Select Distinct Прізвище
+from Клієнти join Замовлення 
+on Клієнти.Id=Замовлення.[Id відпрівника]
+Where [Id оп. відправника]='Х1_2'
+
+Select count(Клієнти.Id) 
+from Клієнти join Замовлення
+on Клієнти.Id=Замовлення.[Id відпрівника]
+Where [Id відділення відправника]= (Select Id from Відділення where Місто='Харків') and [Id відділення отримуача]= (Select Id from Відділення where Місто='Тернопіль')
+
+Select Прізвище,avg([Вартість зі знижкою]) as [середній чек] 
+from Клієнти join Замовлення
+on Клієнти.Id=Замовлення.[Id відпрівника]
+group by Прізвище
+
+Select Прізвище, avg([Вартість зі знижкою]) as [середній чек] , count([Id відпрівника]) as [к.обслужених]
+from Працівники join Замовлення
+on Працівники.Id=Замовлення.[Id оп. відправника]
+group by Прізвище
+
+Select Прізвище 
+from Клієнти join Замовлення
+on Клієнти.Id=Замовлення.[Id отримувача]
+Group by  Прізвище 
+Having Sum([Вартість доставки])>=(Select avg([Вартість доставки]) from Замовлення)
